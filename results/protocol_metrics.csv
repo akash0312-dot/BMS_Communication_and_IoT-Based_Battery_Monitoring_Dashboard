@@ -1,0 +1,8 @@
+protocol,transfer_ms,max_updates_per_s_at_1pct_duty
+CAN 2.0A 500 kbit/s,1.5,
+CAN FD 0.5/2 Mbit/s,0.318,
+SMBus 100 kHz,5.28,
+UART/RS-485 115.2 kbit/s,4.601,
+BLE 4.2 1M PHY (air),0.52,
+LoRa SF7 125 kHz,112.896,0.089
+LoRa SF12 125 kHz,2793.472,0.004

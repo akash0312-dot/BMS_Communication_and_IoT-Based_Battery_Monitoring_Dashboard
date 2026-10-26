@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BMS IoT Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f6f9; --card: #ffffff; --text: #1b2330; --muted: #66707f; --line: #dde2ea;
+    --ok: #1f9d55; --warn: #d98b00; --fault: #d23b3b; --accent: #2a6fdb; --accent2: #8a4fd6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11151c; --card: #1a202a; --text: #e6e9ef; --muted: #98a2b3; --line: #2c3442;
+            --accent: #5b93ef; --accent2: #b084f0; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 20px;
+           background: var(--card); border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 18px; margin: 0 auto 0 0; }
+  .pill { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+          border: 1px solid var(--line); color: var(--muted); }
+  .pill.ok { color: #fff; background: var(--ok); border-color: var(--ok); }
+  .pill.warn { color: #fff; background: var(--warn); border-color: var(--warn); }
+  .pill.fault { color: #fff; background: var(--fault); border-color: var(--fault); }
+  main { display: grid; gap: 14px; padding: 14px 20px; grid-template-columns: repeat(12, 1fr); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+  .card h2 { font-size: 13px; margin: 0 0 8px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .kpis { grid-column: span 12; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+  .kpi .v { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kpi .u { font-size: 13px; color: var(--muted); margin-left: 3px; }
+  .bar { height: 8px; background: var(--line); border-radius: 4px; margin-top: 6px; overflow: hidden; }
+  .bar > div { height: 100%; background: var(--ok); width: 0; transition: width .3s; }
+  .w8 { grid-column: span 8; } .w4 { grid-column: span 4; } .w6 { grid-column: span 6; }
+  @media (max-width: 900px) { .w8, .w4, .w6 { grid-column: span 12; } }
+  .chart { position: relative; height: 240px; }
+  #active { list-style: none; margin: 0; padding: 0; }
+  #active li { padding: 6px 8px; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #fff; }
+  #active li.WARNING { background: var(--warn); } #active li.FAULT { background: var(--fault); }
+  #active .none { color: var(--ok); background: transparent; padding-left: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  .log { max-height: 240px; overflow-y: auto; }
+  .lvl-FAULT { color: var(--fault); font-weight: 600; } .lvl-WARNING { color: var(--warn); font-weight: 600; }
+  .muted { color: var(--muted); font-size: 12px; }
+  #banner { display: none; grid-column: span 12; background: var(--fault); color: #fff; padding: 10px 14px;
+            border-radius: 10px; font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Battery Pack 01 &mdash; 12S3P Li-ion BMS Monitor</h1>
+  <span class="pill" id="mqtt">MQTT: connecting</span>
+  <span class="pill" id="gw">Gateway: ?</span>
+  <span class="pill" id="state">BMS: ?</span>
+  <span class="muted" id="simt">t = 0 s</span>
+</header>
+<main>
+  <div id="banner"></div>
+  <section class="kpis">
+    <div class="card kpi"><h2>State of charge</h2><span class="v" id="soc">--</span><span class="u">%</span>
+      <div class="bar"><div id="socbar"></div></div></div>
+    <div class="card kpi"><h2>Pack voltage</h2><span class="v" id="pv">--</span><span class="u">V</span></div>
+    <div class="card kpi"><h2>Pack current</h2><span class="v" id="pi">--</span><span class="u">A</span></div>
+    <div class="card kpi"><h2>Power</h2><span class="v" id="pw">--</span><span class="u">W</span></div>
+    <div class="card kpi"><h2>Max temperature</h2><span class="v" id="tmax">--</span><span class="u">&deg;C</span></div>
+    <div class="card kpi"><h2>Cell spread</h2><span class="v" id="dv">--</span><span class="u">mV</span></div>
+    <div class="card kpi"><h2>Contactor</h2><span class="v" id="cont" style="font-size:20px">--</span></div>
+    <div class="card kpi"><h2>Current limits</h2><span class="v" id="lim" style="font-size:18px">--</span></div>
+  </section>
+  <div class="card w8"><h2>Pack voltage and current</h2><div class="chart"><canvas id="cVI"></canvas></div></div>
+  <div class="card w4"><h2>Active alarms</h2><ul id="active"><li class="none">No active alarms</li></ul></div>
+  <div class="card w6"><h2>Cell voltages</h2><div class="chart"><canvas id="cCells"></canvas></div></div>
+  <div class="card w6"><h2>Temperatures</h2><div class="chart"><canvas id="cTemp"></canvas></div></div>
+  <div class="card w8"><h2>Alarm log</h2><div class="log"><table><thead><tr><th>Sim time</th><th>Level</th>
+    <th>Alarm</th><th>Status</th><th>Source</th><th>Latency</th></tr></thead><tbody id="log"></tbody></table></div></div>
+  <div class="card w4"><h2>Link statistics</h2><table id="stats"><tbody></tbody></table></div>
+</main>
+<script>
+const BROKER = (new URLSearchParams(location.search)).get("broker") || "ws://" + (location.hostname || "localhost") + ":9001";
+const ROOT = "bms/pack01";
+const N = 300;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+Chart.defaults.color = css("--muted"); Chart.defaults.borderColor = css("--line");
+Chart.defaults.animation = false;
+const $ = id => document.getElementById(id);
+
+const cVI = new Chart($("cVI"), { type: "line",
+  data: { labels: [], datasets: [
+    { label: "Voltage (V)", data: [], borderColor: css("--accent"), yAxisID: "v", pointRadius: 0, borderWidth: 2 },
+    { label: "Current (A)", data: [], borderColor: css("--accent2"), yAxisID: "i", pointRadius: 0, borderWidth: 1.5 }]},
+  options: { maintainAspectRatio: false, scales: { x: { ticks: { maxTicksLimit: 8 } },
+    v: { position: "left", title: { display: true, text: "V" } },
+    i: { position: "right", title: { display: true, text: "A" }, grid: { drawOnChartArea: false } } } } });
+const cCells = new Chart($("cCells"), { type: "bar",
+  data: { labels: Array.from({length: 12}, (_, k) => "C" + (k + 1)), datasets: [{ label: "Cell voltage (V)", data: [], backgroundColor: [] }] },
+  options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 2.8, max: 4.3 } } } });
+const cTemp = new Chart($("cTemp"), { type: "line",
+  data: { labels: [], datasets: [0, 1, 2, 3].map(k => ({ label: "T" + (k + 1) + " (C" + (3*k+1) + "-" + (3*k+3) + ")", data: [],
+    borderColor: ["#2a9d8f", "#e9c46a", "#e76f51", "#6d597a"][k], pointRadius: 0, borderWidth: 2 })) },
+  options: { maintainAspectRatio: false, scales: { y: { suggestedMin: 25, suggestedMax: 65 }, x: { ticks: { maxTicksLimit: 8 } } } } });
+
+const active = new Map();
+let nTel = 0, latSum = 0, latMax = 0, gwStats = {}, beepCtx = null;
+
+function push(chart, label, values) {
+  chart.data.labels.push(label);
+  values.forEach((v, k) => chart.data.datasets[k].data.push(v));
+  if (chart.data.labels.length > N) { chart.data.labels.shift(); chart.data.datasets.forEach(d => d.data.shift()); }
+}
+function setPill(el, text, cls) { el.textContent = text; el.className = "pill " + (cls || ""); }
+function beep() {
+  try { beepCtx = beepCtx || new AudioContext(); const o = beepCtx.createOscillator(); o.frequency.value = 880;
+        o.connect(beepCtx.destination); o.start(); o.stop(beepCtx.currentTime + 0.25); } catch (e) {}
+}
+
+function onTelemetry(p) {
+  $("simt").textContent = "t = " + p.t.toFixed(0) + " s";
+  $("soc").textContent = p.soc.toFixed(1); $("socbar").style.width = p.soc + "%";
+  $("socbar").style.background = p.soc < 15 ? css("--fault") : p.soc < 30 ? css("--warn") : css("--ok");
+  $("pv").textContent = p.pack_v.toFixed(2); $("pi").textContent = p.pack_i.toFixed(1);
+  $("pw").textContent = p.power_w ?? "--";
+  $("tmax").textContent = p.tmax ?? "--";
+  $("tmax").style.color = p.tmax >= 60 ? css("--fault") : p.tmax >= 50 ? css("--warn") : "";
+  $("dv").textContent = p.vmax ? Math.round((p.vmax - p.vmin) * 1000) : "--";
+  $("cont").textContent = p.contactor; $("cont").style.color = p.contactor === "CLOSED" ? css("--ok") : css("--fault");
+  $("lim").textContent = (p.dchg_limit ?? "--") + " / " + (p.chg_limit ?? "--") + " A";
+  const st = p.state, cls = st === "FAULT" || st === "SHUTDOWN" ? "fault" : st === "WARNING" ? "warn" : "ok";
+  setPill($("state"), "BMS: " + st, cls);
+  push(cVI, p.t.toFixed(0), [p.pack_v, p.pack_i]); cVI.update();
+  push(cTemp, p.t.toFixed(0), p.temps); cTemp.update();
+  if (p.cells[0] != null) {
+    const mn = Math.min(...p.cells), mx = Math.max(...p.cells);
+    cCells.data.datasets[0].data = p.cells;
+    cCells.data.datasets[0].backgroundColor = p.cells.map((v, k) =>
+      v >= 4.20 || v <= 3.10 ? css("--fault") : (p.balancing >> k) & 1 ? css("--warn") :
+      v === mn || v === mx ? css("--accent2") : css("--accent"));
+    cCells.update();
+  }
+  if (p.t_can) { const l = Date.now() - p.t_can * 1000; nTel++; latSum += l; latMax = Math.max(latMax, l); }
+  renderStats();
+}
+
+function onAlarm(a) {
+  const key = a.code + ":" + a.level;
+  if (a.active) { active.set(key, a); if (a.level === "FAULT") beep(); } else active.delete(key);
+  const ul = $("active"); ul.innerHTML = "";
+  if (!active.size) ul.innerHTML = '<li class="none">No active alarms</li>';
+  [...active.values()].sort((x, y) => (y.level === "FAULT") - (x.level === "FAULT")).forEach(x => {
+    const li = document.createElement("li"); li.className = x.level;
+    li.textContent = x.level + " - " + x.text + " (since t=" + x.t.toFixed(1) + " s)"; ul.appendChild(li); });
+  const faults = [...active.values()].filter(x => x.level === "FAULT");
+  $("banner").style.display = faults.length ? "block" : "none";
+  $("banner").textContent = faults.length ? "FAULT: " + faults.map(x => x.text).join(", ") + " - contactor opened / check pack" : "";
+  const tr = document.createElement("tr");
+  const lat = a.t_can ? (Date.now() - a.t_can * 1000).toFixed(0) + " ms" : "-";
+  tr.innerHTML = `<td>${a.t.toFixed(1)} s</td><td class="lvl-${a.level}">${a.level}</td><td>${a.text}</td>` +
+                 `<td>${a.active ? "RAISED" : "cleared"}</td><td>${a.source}</td><td>${lat}</td>`;
+  $("log").prepend(tr);
+}
+
+function renderStats() {
+  const rows = { "Telemetry msgs": nTel, "Mean latency": nTel ? (latSum / nTel).toFixed(1) + " ms" : "-",
+    "Max latency": latMax.toFixed(1) + " ms", "CAN frames (gateway)": gwStats.frames ?? "-",
+    "Checksum errors": gwStats.checksum_errors ?? "-", "Counter jumps": gwStats.counter_jumps ?? "-",
+    "Comm-loss events": gwStats.comm_loss_events ?? "-", "Broker": BROKER };
+  $("stats").tBodies[0].innerHTML = Object.entries(rows).map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("");
+}
+
+const client = mqtt.connect(BROKER, { clientId: "dashboard-" + Math.random().toString(16).slice(2, 8), reconnectPeriod: 2000 });
+client.on("connect", () => { setPill($("mqtt"), "MQTT: connected", "ok"); client.subscribe(ROOT + "/#", { qos: 1 }); });
+client.on("close", () => setPill($("mqtt"), "MQTT: disconnected", "fault"));
+client.on("message", (topic, buf) => {
+  let p; try { p = JSON.parse(buf.toString()); } catch (e) { return; }
+  const leaf = topic.split("/").pop();
+  if (leaf === "telemetry") onTelemetry(p);
+  else if (leaf === "alarms") onAlarm(p);
+  else if (leaf === "status") setPill($("gw"), "Gateway: " + (p.online ? "online" : "offline"), p.online ? "ok" : "fault");
+  else if (leaf === "gateway") { gwStats = p; renderStats(); }
+});
+renderStats();
+</script>
+</body>
+</html>

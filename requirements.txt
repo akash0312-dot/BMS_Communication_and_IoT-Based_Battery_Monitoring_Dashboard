@@ -1,0 +1,6 @@
+numpy
+matplotlib
+python-can>=4.4
+cantools>=39
+paho-mqtt>=2.0
+amqtt>=0.12

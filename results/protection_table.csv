@@ -1,0 +1,11 @@
+event,description,injected_s,flag,level,bms_detect_s,detection_delay_s,dashboard_latency_ms,cleared_s,response
+REGEN_HIGH_SOC,Strong regenerative braking at 90 % SoC (-14 A),75.0,CELL_OV,WARNING,75.4,0.4,3.937,83.0,"Warning state, alarm on dashboard"
+REGEN_HIGH_SOC,Strong regenerative braking at 90 % SoC (-14 A),75.0,OC_CHARGE,WARNING,75.4,0.4,4.256,83.0,"Warning state, alarm on dashboard"
+OVERCURRENT,"Load surge: 30 A for 4 s, then 40 A",600.0,OC_DISCHARGE,WARNING,600.4,0.4,1.462,607.0,"Warning state, alarm on dashboard"
+OVERCURRENT,"Load surge: 30 A for 4 s, then 40 A",600.0,OC_DISCHARGE,FAULT,604.9,4.9,1.362,635.0,"Contactor opened, fault alarm"
+CAN_COMM_LOSS,BMS stops transmitting for 5 s,1000.0,COMM_LOSS,FAULT,1000.6,0.6,0.916,1005.1,Gateway raises BMS-offline alarm
+SENSOR_OPEN,NTC sensor 2 open circuit (reads -40 degC),1300.0,SENSOR_FAULT,WARNING,1300.4,0.4,1.137,1502.0,"Warning state, alarm on dashboard"
+SHORT_CIRCUIT,External short: 150 A pulse,1700.0,SHORT_CIRCUIT,FAULT,1700.0,0.0,1.352,1760.1,"Contactor opened, latched until service reset"
+THERMAL_ANOMALY,Module-3 fan failure + growing micro-short in cell 8 (2 W -> 16 W),2400.0,TR_TREND,WARNING,2482.3,82.3,1.566,active at end,"Warning state, alarm on dashboard"
+THERMAL_ANOMALY,Module-3 fan failure + growing micro-short in cell 8 (2 W -> 16 W),2400.0,OVER_TEMP,WARNING,2652.0,252.0,3.337,active at end,"Warning state, alarm on dashboard"
+THERMAL_ANOMALY,Module-3 fan failure + growing micro-short in cell 8 (2 W -> 16 W),2400.0,OVER_TEMP,FAULT,2861.8,461.8,2.074,active at end,"Contactor opened, fault alarm"

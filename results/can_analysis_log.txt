@@ -1,0 +1,28 @@
+CAN message table:
+   {'message': 'BMS_PackStatus', 'can_id': '0x100', 'dlc': 8, 'cycle_ms': 100, 'bits_mean': 117.4, 'bits_max': 123, 'bits_worst': 135, 'frames_per_s': 10.0, 'load_125k_%': 0.94, 'load_250k_%': 0.47, 'load_500k_%': 0.235}
+   {'message': 'BMS_CellSummary', 'can_id': '0x101', 'dlc': 8, 'cycle_ms': 100, 'bits_mean': 115.3, 'bits_max': 122, 'bits_worst': 135, 'frames_per_s': 10.0, 'load_125k_%': 0.923, 'load_250k_%': 0.461, 'load_500k_%': 0.231}
+   {'message': 'BMS_Limits', 'can_id': '0x102', 'dlc': 8, 'cycle_ms': 100, 'bits_mean': 120.5, 'bits_max': 124, 'bits_worst': 135, 'frames_per_s': 10.0, 'load_125k_%': 0.964, 'load_250k_%': 0.482, 'load_500k_%': 0.241}
+   {'message': 'BMS_CellV_01_04', 'can_id': '0x110', 'dlc': 8, 'cycle_ms': 200, 'bits_mean': 116.3, 'bits_max': 123, 'bits_worst': 135, 'frames_per_s': 5.0, 'load_125k_%': 0.465, 'load_250k_%': 0.233, 'load_500k_%': 0.116}
+   {'message': 'BMS_CellV_05_08', 'can_id': '0x111', 'dlc': 8, 'cycle_ms': 200, 'bits_mean': 115.2, 'bits_max': 122, 'bits_worst': 135, 'frames_per_s': 5.0, 'load_125k_%': 0.461, 'load_250k_%': 0.23, 'load_500k_%': 0.115}
+   {'message': 'BMS_CellV_09_12', 'can_id': '0x112', 'dlc': 8, 'cycle_ms': 200, 'bits_mean': 115.5, 'bits_max': 124, 'bits_worst': 135, 'frames_per_s': 5.0, 'load_125k_%': 0.462, 'load_250k_%': 0.231, 'load_500k_%': 0.115}
+   {'message': 'BMS_Temperatures', 'can_id': '0x120', 'dlc': 8, 'cycle_ms': 1000, 'bits_mean': 117.5, 'bits_max': 121, 'bits_worst': 135, 'frames_per_s': 1.0, 'load_125k_%': 0.094, 'load_250k_%': 0.047, 'load_500k_%': 0.024}
+   {'message': 'BMS_Faults', 'can_id': '0x130', 'dlc': 8, 'cycle_ms': 100, 'bits_mean': 123.6, 'bits_max': 125, 'bits_worst': 135, 'frames_per_s': 10.0, 'load_125k_%': 0.989, 'load_250k_%': 0.495, 'load_500k_%': 0.247}
+  total bus load %: {125: 5.3, 250: 2.65, 500: 1.32}  worst-case stuffing @500k: 1.51 %
+  max cells below 50 % load: {125: 368, 250: 764, 500: 800}
+  1 bit errors: parity 0.0000  sum8 0.0000  crc15 0.000000
+  2 bit errors: parity 0.1137  sum8 0.0614  crc15 0.000000
+  3 bit errors: parity 0.0000  sum8 0.0114  crc15 0.000000
+  4 bit errors: parity 0.0357  sum8 0.0146  crc15 0.000000
+  5 bit errors: parity 0.0000  sum8 0.0066  crc15 0.000000
+  6 bit errors: parity 0.0182  sum8 0.0068  crc15 0.000075
+  7 bit errors: parity 0.0000  sum8 0.0045  crc15 0.000000
+  8 bit errors: parity 0.0124  sum8 0.0044  crc15 0.000075
+  CRC-15 detects every burst <= 15 bits: True
+Protocol comparison for a 48-byte snapshot:
+  CAN 2.0A 500 kbit/s              1.500 ms
+  CAN FD 0.5/2 Mbit/s              0.318 ms
+  SMBus 100 kHz                    5.280 ms
+  UART/RS-485 115.2 kbit/s         4.601 ms
+  BLE 4.2 1M PHY (air)             0.520 ms
+  LoRa SF7 125 kHz               112.896 ms
+  LoRa SF12 125 kHz             2793.472 ms

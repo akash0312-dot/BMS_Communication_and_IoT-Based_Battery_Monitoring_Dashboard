@@ -1,0 +1,12 @@
+{
+  "t": 3000.0,
+  "frames": 167720,
+  "bytes": 1341760,
+  "checksum_errors": 0,
+  "counter_jumps": 0,
+  "comm_loss_events": 1,
+  "telemetry_msgs": 2995,
+  "alarm_msgs": 39,
+  "t_rx": 1793020234.818252,
+  "t_sim_rx": 3000.0
+}

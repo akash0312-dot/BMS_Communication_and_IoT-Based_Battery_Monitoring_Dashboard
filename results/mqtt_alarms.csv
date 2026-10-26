@@ -1,0 +1,40 @@
+t_bms,t_dashboard,code,level,active,source,text,latency_ms
+75.5,75.5,CELL_OV,WARNING,True,BMS,Cell over-voltage,3.937
+75.5,75.5,OC_CHARGE,WARNING,True,BMS,Charge over-current,4.256
+83.0,83.0,CELL_OV,WARNING,False,BMS,Cell over-voltage,1.428
+83.0,83.0,OC_CHARGE,WARNING,False,BMS,Charge over-current,1.592
+600.5,600.5,OC_DISCHARGE,WARNING,True,BMS,Discharge over-current,1.462
+604.5,604.5,CELL_UV,WARNING,True,BMS,Cell under-voltage,1.63
+605.0,605.0,OC_DISCHARGE,FAULT,True,BMS,Discharge over-current,1.362
+607.0,607.0,CELL_UV,WARNING,False,BMS,Cell under-voltage,1.716
+607.0,607.0,OC_DISCHARGE,WARNING,False,BMS,Discharge over-current,1.924
+635.0,635.0,OC_DISCHARGE,FAULT,False,BMS,Discharge over-current,1.361
+1000.6,1000.6,COMM_LOSS,FAULT,True,GATEWAY,BMS communication lost (CAN timeout),0.916
+1005.1,1005.1,COMM_LOSS,FAULT,False,GATEWAY,BMS communication lost (CAN timeout),1.559
+1300.5,1300.5,SENSOR_FAULT,WARNING,True,BMS,Temperature sensor fault,1.137
+1502.0,1502.0,SENSOR_FAULT,WARNING,False,BMS,Temperature sensor fault,1.518
+1700.1,1700.1,SHORT_CIRCUIT,FAULT,True,BMS,Short circuit,1.352
+1760.1,1760.1,SHORT_CIRCUIT,FAULT,False,BMS,Short circuit,2.09
+1957.9,1957.9,CELL_UV,WARNING,True,BMS,Cell under-voltage,2.466
+1963.8,1963.8,CELL_UV,WARNING,False,BMS,Cell under-voltage,1.196
+1998.2,1998.2,IMBALANCE,WARNING,True,BMS,Cell imbalance,1.606
+2013.7,2013.7,IMBALANCE,WARNING,False,BMS,Cell imbalance,1.627
+2067.3,2067.3,IMBALANCE,WARNING,True,BMS,Cell imbalance,1.685
+2076.8,2076.8,CELL_UV,WARNING,True,BMS,Cell under-voltage,1.688
+2085.7,2085.7,IMBALANCE,WARNING,False,BMS,Cell imbalance,1.253
+2088.3,2088.3,CELL_UV,WARNING,False,BMS,Cell under-voltage,1.444
+2090.1,2090.1,LOW_SOC,WARNING,True,BMS,Low state of charge,1.81
+2125.3,2125.3,IMBALANCE,WARNING,True,BMS,Cell imbalance,1.452
+2126.4,2126.4,CELL_UV,WARNING,True,BMS,Cell under-voltage,1.39
+2135.5,2135.5,IMBALANCE,WARNING,False,BMS,Cell imbalance,1.888
+2170.2,2170.2,CELL_UV,WARNING,False,BMS,Cell under-voltage,1.595
+2178.2,2178.2,IMBALANCE,WARNING,True,BMS,Cell imbalance,1.568
+2186.9,2186.9,CELL_UV,WARNING,True,BMS,Cell under-voltage,1.486
+2196.3,2196.3,IMBALANCE,WARNING,False,BMS,Cell imbalance,1.471
+2202.0,2202.0,CELL_UV,WARNING,False,BMS,Cell under-voltage,1.508
+2205.0,2205.0,IMBALANCE,WARNING,True,BMS,Cell imbalance,1.812
+2310.0,2310.0,IMBALANCE,WARNING,False,BMS,Cell imbalance,1.269
+2482.4,2482.4,TR_TREND,WARNING,True,BMS,Thermal-runaway trend (dT/dt),1.566
+2555.7,2555.7,LOW_SOC,WARNING,False,BMS,Low state of charge,1.452
+2652.1,2652.1,OVER_TEMP,WARNING,True,BMS,Over-temperature,3.337
+2861.9,2861.9,OVER_TEMP,FAULT,True,BMS,Over-temperature,2.074

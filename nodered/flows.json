@@ -1,0 +1,511 @@
+[
+ {
+  "id": "f_bms",
+  "type": "tab",
+  "label": "BMS IoT Dashboard"
+ },
+ {
+  "id": "mqtt_broker",
+  "type": "mqtt-broker",
+  "name": "Local broker",
+  "broker": "127.0.0.1",
+  "port": "1883",
+  "clientid": "nodered-bms",
+  "usetls": false,
+  "protocolVersion": "4",
+  "keepalive": "60",
+  "cleansession": true,
+  "birthTopic": "",
+  "closeTopic": "",
+  "willTopic": ""
+ },
+ {
+  "id": "ui_tab_bms",
+  "type": "ui_tab",
+  "name": "Battery Pack 01",
+  "icon": "dashboard",
+  "order": 1
+ },
+ {
+  "id": "ui_base_cfg",
+  "type": "ui_base",
+  "theme": {
+   "name": "theme-dark",
+   "lightTheme": {
+    "default": "#0094CE",
+    "baseColor": "#0094CE",
+    "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+    "edited": false
+   },
+   "darkTheme": {
+    "default": "#097479",
+    "baseColor": "#097479",
+    "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+    "edited": true,
+    "reset": false
+   },
+   "customTheme": {
+    "name": "Untitled Theme 1",
+    "default": "#4B7930",
+    "baseColor": "#4B7930",
+    "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+   },
+   "themeState": {
+    "base-color": {
+     "value": "#097479",
+     "edited": false
+    },
+    "page-titlebar-backgroundColor": {
+     "value": "#097479",
+     "edited": false
+    },
+    "page-backgroundColor": {
+     "value": "#111111",
+     "edited": false
+    },
+    "page-sidebar-backgroundColor": {
+     "value": "#333333",
+     "edited": false
+    },
+    "group-textColor": {
+     "value": "#0eb8c0",
+     "edited": false
+    },
+    "group-borderColor": {
+     "value": "#555555",
+     "edited": false
+    },
+    "group-backgroundColor": {
+     "value": "#333333",
+     "edited": false
+    },
+    "widget-textColor": {
+     "value": "#eeeeee",
+     "edited": false
+    },
+    "widget-backgroundColor": {
+     "value": "#097479",
+     "edited": false
+    },
+    "widget-borderColor": {
+     "value": "#333333",
+     "edited": false
+    },
+    "base-font": {
+     "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+     "edited": false
+    }
+   },
+   "angularTheme": {
+    "primary": "indigo",
+    "accents": "blue",
+    "warn": "red",
+    "background": "grey",
+    "palette": "light"
+   }
+  },
+  "site": {
+   "name": "BMS Dashboard",
+   "hideToolbar": "false",
+   "allowSwipe": "false",
+   "lockMenu": "false",
+   "allowTempTheme": "true",
+   "dateFormat": "DD/MM/YYYY",
+   "sizes": {
+    "sx": 48,
+    "sy": 48,
+    "gx": 6,
+    "gy": 6,
+    "cx": 6,
+    "cy": 6,
+    "px": 0,
+    "py": 0
+   }
+  }
+ },
+ {
+  "id": "g_pack",
+  "type": "ui_group",
+  "name": "Pack",
+  "tab": "ui_tab_bms",
+  "order": 1,
+  "disp": true,
+  "width": "6"
+ },
+ {
+  "id": "g_trend",
+  "type": "ui_group",
+  "name": "Trends",
+  "tab": "ui_tab_bms",
+  "order": 2,
+  "disp": true,
+  "width": "12"
+ },
+ {
+  "id": "g_cells",
+  "type": "ui_group",
+  "name": "Cells and temperatures",
+  "tab": "ui_tab_bms",
+  "order": 3,
+  "disp": true,
+  "width": "6"
+ },
+ {
+  "id": "g_alarm",
+  "type": "ui_group",
+  "name": "Alarms",
+  "tab": "ui_tab_bms",
+  "order": 4,
+  "disp": true,
+  "width": "12"
+ },
+ {
+  "id": "in_tel",
+  "type": "mqtt in",
+  "name": "bms/pack01/telemetry",
+  "topic": "bms/pack01/telemetry",
+  "qos": "0",
+  "datatype": "json",
+  "broker": "mqtt_broker",
+  "wires": [
+   [
+    "fn_split"
+   ]
+  ],
+  "z": "f_bms",
+  "x": 200,
+  "y": 40
+ },
+ {
+  "id": "fn_split",
+  "type": "function",
+  "name": "split telemetry",
+  "outputs": 8,
+  "func": "\nconst p = msg.payload;\nconst dv = p.vmax && p.vmin ? Math.round((p.vmax - p.vmin) * 1000) : null;\nreturn [\n  {payload: p.soc}, {payload: p.pack_v}, {payload: p.pack_i}, {payload: p.tmax},\n  [{topic: \"Voltage (V)\", payload: p.pack_v}, {topic: \"Current (A)\", payload: p.pack_i}],\n  p.temps.map((t, k) => ({topic: \"T\" + (k + 1), payload: t})),\n  {payload: p.state + \" | contactor \" + p.contactor + \" | t = \" + p.t.toFixed(0) + \" s\"},\n  {payload: \"min \" + p.vmin + \" V (C\" + p.vmin_idx + \")  max \" + p.vmax + \" V (C\" + p.vmax_idx + \")  spread \" + dv + \" mV\"}\n];",
+  "wires": [
+   [
+    "ui_soc"
+   ],
+   [
+    "ui_v"
+   ],
+   [
+    "ui_i"
+   ],
+   [
+    "ui_t"
+   ],
+   [
+    "ui_chart_vi"
+   ],
+   [
+    "ui_chart_t"
+   ],
+   [
+    "ui_state"
+   ],
+   [
+    "ui_cells"
+   ]
+  ],
+  "z": "f_bms",
+  "x": 420,
+  "y": 40
+ },
+ {
+  "id": "ui_soc",
+  "type": "ui_gauge",
+  "name": "SoC",
+  "group": "g_pack",
+  "order": 1,
+  "width": "3",
+  "height": "3",
+  "gtype": "gage",
+  "title": "SoC",
+  "label": "%",
+  "format": "{{value}}",
+  "min": 0,
+  "max": 100,
+  "colors": [
+   "#ca3838",
+   "#e6e600",
+   "#00b500"
+  ],
+  "seg1": "15",
+  "seg2": "30",
+  "y": 40,
+  "z": "f_bms",
+  "x": 640,
+  "wires": []
+ },
+ {
+  "id": "ui_v",
+  "type": "ui_gauge",
+  "name": "Pack voltage",
+  "group": "g_pack",
+  "order": 2,
+  "width": "3",
+  "height": "3",
+  "gtype": "gage",
+  "title": "Pack voltage",
+  "label": "V",
+  "format": "{{value}}",
+  "min": 30,
+  "max": 51,
+  "colors": [
+   "#ca3838",
+   "#e6e600",
+   "#00b500"
+  ],
+  "seg1": "37",
+  "seg2": "40",
+  "y": 90,
+  "z": "f_bms",
+  "x": 640,
+  "wires": []
+ },
+ {
+  "id": "ui_i",
+  "type": "ui_gauge",
+  "name": "Current",
+  "group": "g_pack",
+  "order": 3,
+  "width": "3",
+  "height": "3",
+  "gtype": "gage",
+  "title": "Current",
+  "label": "A",
+  "format": "{{value}}",
+  "min": -20,
+  "max": 40,
+  "colors": [
+   "#00b500",
+   "#e6e600",
+   "#ca3838"
+  ],
+  "seg1": "25",
+  "seg2": "35",
+  "y": 140,
+  "z": "f_bms",
+  "x": 640,
+  "wires": []
+ },
+ {
+  "id": "ui_t",
+  "type": "ui_gauge",
+  "name": "Max temperature",
+  "group": "g_pack",
+  "order": 4,
+  "width": "3",
+  "height": "3",
+  "gtype": "gage",
+  "title": "Max temperature",
+  "label": "degC",
+  "format": "{{value}}",
+  "min": 0,
+  "max": 80,
+  "colors": [
+   "#00b500",
+   "#e6e600",
+   "#ca3838"
+  ],
+  "seg1": "50",
+  "seg2": "60",
+  "y": 190,
+  "z": "f_bms",
+  "x": 640,
+  "wires": []
+ },
+ {
+  "id": "ui_chart_vi",
+  "type": "ui_chart",
+  "name": "V and I",
+  "group": "g_trend",
+  "order": 1,
+  "width": "12",
+  "height": "5",
+  "label": "Pack voltage and current",
+  "chartType": "line",
+  "removeOlder": "10",
+  "removeOlderUnit": "60",
+  "removeOlderPoints": "600",
+  "ymin": "",
+  "ymax": "",
+  "legend": "true",
+  "interpolate": "linear",
+  "useOldStyle": false,
+  "y": 240,
+  "z": "f_bms",
+  "x": 640,
+  "wires": []
+ },
+ {
+  "id": "ui_chart_t",
+  "type": "ui_chart",
+  "name": "Temperatures",
+  "group": "g_cells",
+  "order": 2,
+  "width": "6",
+  "height": "4",
+  "label": "Sensor temperatures (degC)",
+  "chartType": "line",
+  "removeOlder": "10",
+  "removeOlderUnit": "60",
+  "removeOlderPoints": "600",
+  "ymin": "20",
+  "ymax": "80",
+  "legend": "true",
+  "interpolate": "linear",
+  "useOldStyle": false,
+  "y": 290,
+  "z": "f_bms",
+  "x": 640,
+  "wires": []
+ },
+ {
+  "id": "ui_state",
+  "type": "ui_text",
+  "name": "state",
+  "group": "g_pack",
+  "order": 5,
+  "width": "6",
+  "height": "1",
+  "label": "BMS",
+  "format": "{{msg.payload}}",
+  "layout": "row-spread",
+  "y": 340,
+  "z": "f_bms",
+  "x": 640,
+  "wires": []
+ },
+ {
+  "id": "ui_cells",
+  "type": "ui_text",
+  "name": "cells",
+  "group": "g_cells",
+  "order": 1,
+  "width": "6",
+  "height": "1",
+  "label": "Cells",
+  "format": "{{msg.payload}}",
+  "layout": "row-spread",
+  "y": 390,
+  "z": "f_bms",
+  "x": 640,
+  "wires": []
+ },
+ {
+  "id": "in_alarm",
+  "type": "mqtt in",
+  "name": "bms/pack01/alarms",
+  "topic": "bms/pack01/alarms",
+  "qos": "1",
+  "datatype": "json",
+  "broker": "mqtt_broker",
+  "wires": [
+   [
+    "fn_alarm"
+   ]
+  ],
+  "z": "f_bms",
+  "x": 200,
+  "y": 480
+ },
+ {
+  "id": "fn_alarm",
+  "type": "function",
+  "name": "alarm list + toast",
+  "outputs": 2,
+  "func": "\nconst a = msg.payload;\nlet act = flow.get(\"active\") || {};\nlet log = flow.get(\"log\") || [];\nconst key = a.code + \":\" + a.level;\nif (a.active) act[key] = a; else delete act[key];\nlog.unshift(a); log = log.slice(0, 50);\nflow.set(\"active\", act); flow.set(\"log\", log);\nconst toast = a.active && a.level === \"FAULT\"\n  ? {topic: \"BMS FAULT\", payload: a.text + \" at t = \" + a.t.toFixed(1) + \" s\"} : null;\nreturn [{payload: {active: Object.values(act), log: log}}, toast];",
+  "wires": [
+   [
+    "ui_alarms"
+   ],
+   [
+    "ui_toast"
+   ]
+  ],
+  "z": "f_bms",
+  "x": 420,
+  "y": 480
+ },
+ {
+  "id": "ui_alarms",
+  "type": "ui_template",
+  "name": "alarm table",
+  "group": "g_alarm",
+  "order": 1,
+  "width": "12",
+  "height": "8",
+  "format": "\n<div>\n  <h4 style=\"margin:4px 0\">Active alarms</h4>\n  <div ng-if=\"!msg.payload.active.length\" style=\"color:#3c3\">No active alarms</div>\n  <div ng-repeat=\"a in msg.payload.active\" ng-style=\"{background: a.level=='FAULT' ? '#c33' : '#d98b00', color:'#fff', padding:'4px 8px', margin:'2px 0', 'border-radius':'4px'}\">\n    {{a.level}} - {{a.text}} (since t = {{a.t | number:1}} s, source {{a.source}})</div>\n  <h4 style=\"margin:10px 0 4px\">Alarm log</h4>\n  <table style=\"width:100%; font-size:12px\">\n    <tr><th align=\"left\">t (s)</th><th align=\"left\">Level</th><th align=\"left\">Alarm</th><th align=\"left\">Status</th></tr>\n    <tr ng-repeat=\"a in msg.payload.log\"><td>{{a.t | number:1}}</td><td>{{a.level}}</td><td>{{a.text}}</td>\n        <td>{{a.active ? 'RAISED' : 'cleared'}}</td></tr>\n  </table>\n</div>",
+  "storeOutMessages": true,
+  "fwdInMessages": true,
+  "templateScope": "local",
+  "z": "f_bms",
+  "x": 640,
+  "y": 480,
+  "wires": []
+ },
+ {
+  "id": "ui_toast",
+  "type": "ui_toast",
+  "name": "fault popup",
+  "position": "top right",
+  "displayTime": "5",
+  "highlight": "red",
+  "outputs": 0,
+  "topic": "",
+  "y": 530,
+  "z": "f_bms",
+  "x": 640,
+  "wires": []
+ },
+ {
+  "id": "in_status",
+  "type": "mqtt in",
+  "name": "bms/pack01/status",
+  "topic": "bms/pack01/status",
+  "qos": "1",
+  "datatype": "json",
+  "broker": "mqtt_broker",
+  "wires": [
+   [
+    "fn_status"
+   ]
+  ],
+  "z": "f_bms",
+  "x": 200,
+  "y": 600
+ },
+ {
+  "id": "fn_status",
+  "type": "function",
+  "name": "gateway status",
+  "func": "msg.payload = msg.payload.online ? \"ONLINE\" : \"OFFLINE\"; return msg;",
+  "outputs": 1,
+  "wires": [
+   [
+    "ui_gw"
+   ]
+  ],
+  "z": "f_bms",
+  "x": 420,
+  "y": 600
+ },
+ {
+  "id": "ui_gw",
+  "type": "ui_text",
+  "name": "gateway",
+  "group": "g_pack",
+  "order": 6,
+  "width": "6",
+  "height": "1",
+  "label": "Gateway",
+  "format": "{{msg.payload}}",
+  "layout": "row-spread",
+  "z": "f_bms",
+  "x": 640,
+  "y": 600,
+  "wires": []
+ }
+]

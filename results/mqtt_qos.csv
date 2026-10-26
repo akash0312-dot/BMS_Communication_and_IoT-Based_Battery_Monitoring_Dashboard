@@ -1,0 +1,9 @@
+qos,sent,received,mean_ms,p50_ms,p99_ms,max_ms,bytes_on_wire,packets_per_msg
+0,1000,1000,1.496,1.471,2.914,4.182,644,1
+1,1000,1000,1.785,1.662,3.31,29.072,650,2
+2,1000,1000,3.194,2.847,7.207,78.299,658,4
+
+qos,published,published_while_offline,delivered,lost,lost_of_offline,duplicates
+0,200,59,141,59,59,0
+1,200,59,200,0,0,0
+2,200,59,200,0,0,0

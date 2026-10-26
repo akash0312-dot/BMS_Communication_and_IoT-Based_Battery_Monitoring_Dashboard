@@ -1,0 +1,5 @@
+encoding,bytes_per_update,type
+Raw CAN frames forwarded (8 msgs x 8 B + 5 B header),104,binary
+"Compact binary snapshot (cells, temps, status)",48,binary
+JSON telemetry (this project),508.66644407345575,text
+"One topic per signal (35 topics, ~6 B values)",1120,text

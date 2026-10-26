@@ -1,0 +1,84 @@
+VERSION "1.0"
+
+NS_ :
+
+BS_:
+
+BU_: BMS GATEWAY
+
+BO_ 256 BMS_PackStatus: 8 BMS
+ SG_ PackVoltage : 0|16@1+ (0.01,0) [0|655.35] "V" GATEWAY
+ SG_ PackCurrent : 16|16@1- (0.1,0) [-3276.8|3276.7] "A" GATEWAY
+ SG_ SoC : 32|8@1+ (0.5,0) [0|100] "%" GATEWAY
+ SG_ SoH : 40|8@1+ (0.5,0) [0|100] "%" GATEWAY
+ SG_ BmsState : 48|4@1+ (1,0) [0|15] "" GATEWAY
+ SG_ RollingCounter : 52|4@1+ (1,0) [0|15] "" GATEWAY
+ SG_ Checksum : 56|8@1+ (1,0) [0|255] "" GATEWAY
+
+BO_ 257 BMS_CellSummary: 8 BMS
+ SG_ MinCellVoltage : 0|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ MaxCellVoltage : 16|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ MinCellIdx : 32|8@1+ (1,0) [0|255] "" GATEWAY
+ SG_ MaxCellIdx : 40|8@1+ (1,0) [0|255] "" GATEWAY
+ SG_ MaxTemp : 48|8@1+ (1,-40) [-40|215] "degC" GATEWAY
+ SG_ MinTemp : 56|8@1+ (1,-40) [-40|215] "degC" GATEWAY
+
+BO_ 258 BMS_Limits: 8 BMS
+ SG_ DischargeCurrentLimit : 0|16@1+ (0.1,0) [0|6553.5] "A" GATEWAY
+ SG_ ChargeCurrentLimit : 16|16@1+ (0.1,0) [0|6553.5] "A" GATEWAY
+ SG_ PackPower : 32|16@1- (1,0) [-32768|32767] "W" GATEWAY
+ SG_ ContactorState : 48|2@1+ (1,0) [0|3] "" GATEWAY
+ SG_ ChargerConnected : 50|1@1+ (1,0) [0|1] "" GATEWAY
+ SG_ BalancingActive : 51|1@1+ (1,0) [0|1] "" GATEWAY
+
+BO_ 272 BMS_CellV_01_04: 8 BMS
+ SG_ Cell01 : 0|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ Cell02 : 16|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ Cell03 : 32|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ Cell04 : 48|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+
+BO_ 273 BMS_CellV_05_08: 8 BMS
+ SG_ Cell05 : 0|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ Cell06 : 16|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ Cell07 : 32|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ Cell08 : 48|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+
+BO_ 274 BMS_CellV_09_12: 8 BMS
+ SG_ Cell09 : 0|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ Cell10 : 16|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ Cell11 : 32|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+ SG_ Cell12 : 48|16@1+ (0.001,0) [0|65.535] "V" GATEWAY
+
+BO_ 288 BMS_Temperatures: 8 BMS
+ SG_ Temp1 : 0|16@1- (0.1,0) [-3276.8|3276.7] "degC" GATEWAY
+ SG_ Temp2 : 16|16@1- (0.1,0) [-3276.8|3276.7] "degC" GATEWAY
+ SG_ Temp3 : 32|16@1- (0.1,0) [-3276.8|3276.7] "degC" GATEWAY
+ SG_ Temp4 : 48|16@1- (0.1,0) [-3276.8|3276.7] "degC" GATEWAY
+
+BO_ 304 BMS_Faults: 8 BMS
+ SG_ WarningFlags : 0|16@1+ (1,0) [0|65535] "" GATEWAY
+ SG_ FaultFlags : 16|16@1+ (1,0) [0|65535] "" GATEWAY
+ SG_ BalancingMask : 32|12@1+ (1,0) [0|4095] "" GATEWAY
+ SG_ RollingCounter : 44|4@1+ (1,0) [0|15] "" GATEWAY
+ SG_ FaultCount : 48|8@1+ (1,0) [0|255] "" GATEWAY
+ SG_ Checksum : 56|8@1+ (1,0) [0|255] "" GATEWAY
+
+CM_ BO_ 256 "Pack voltage, current, SoC, SoH and BMS state. Protected by rolling counter and checksum.";
+CM_ BO_ 304 "Warning and fault bit fields (bit map in config.FLAG_BITS). Also sent immediately on change.";
+CM_ SG_ 256 PackCurrent "Positive = discharge, negative = charge.";
+CM_ SG_ 256 Checksum "0xFF XOR (sum of bytes 0..6 + low byte of CAN ID) mod 256.";
+CM_ SG_ 258 ContactorState "0 = open, 1 = pre-charge, 2 = closed.";
+
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 10000;
+BA_DEF_DEF_ "GenMsgCycleTime" 0;
+BA_ "GenMsgCycleTime" BO_ 256 100;
+BA_ "GenMsgCycleTime" BO_ 257 100;
+BA_ "GenMsgCycleTime" BO_ 258 100;
+BA_ "GenMsgCycleTime" BO_ 272 200;
+BA_ "GenMsgCycleTime" BO_ 273 200;
+BA_ "GenMsgCycleTime" BO_ 274 200;
+BA_ "GenMsgCycleTime" BO_ 288 1000;
+BA_ "GenMsgCycleTime" BO_ 304 100;
+
+VAL_ 256 BmsState 0 "INIT" 1 "STANDBY" 2 "DISCHARGE" 3 "CHARGE" 4 "WARNING" 5 "FAULT" 6 "SHUTDOWN" ;
+VAL_ 258 ContactorState 0 "OPEN" 1 "PRECHARGE" 2 "CLOSED" ;
